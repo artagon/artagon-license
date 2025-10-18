@@ -8,16 +8,22 @@ new projects or updating existing ones.
 
 ## Contents
 
+### Root Files
 - `LICENSE`: Dual-license overview (AGPL-3.0 + commercial).
-- `LICENSE-AGPL.txt`: Full AGPL-3.0 text with Artagon terms.
-- `LICENSE-COMMERCIAL.txt`: Commercial license agreement.
-- `LICENSING.md`: Guidance for choosing the correct license.
-- `CLA.md` / `CLA-CORPORATE.md`: Contributor license agreements.
 - `README-LICENSE-SECTION.md`: Drop-in README snippet.
-- `SOURCE-FILE-HEADER.txt`: Standard source file header.
-- `TRADEMARK-POLICY.md`: Brand usage policy.
-- `.github/ISSUE_TEMPLATE/licensing-question.md`: GitHub issue template.
 - `IMPLEMENTATION-GUIDE.md`: Detailed integration checklist.
+
+### License Documents (`licenses/`)
+- [`licenses/LICENSE-AGPL.txt`](licenses/LICENSE-AGPL.txt): Full AGPL-3.0 text with Artagon terms.
+- [`licenses/LICENSE-COMMERCIAL.txt`](licenses/LICENSE-COMMERCIAL.txt): Commercial license agreement.
+- [`licenses/LICENSING.md`](licenses/LICENSING.md): Guidance for choosing the correct license.
+- [`licenses/CLA.md`](licenses/CLA.md): Individual contributor license agreement.
+- [`licenses/CLA-CORPORATE.md`](licenses/CLA-CORPORATE.md): Corporate contributor license agreement.
+- [`licenses/SOURCE-FILE-HEADER.txt`](licenses/SOURCE-FILE-HEADER.txt): Standard source file header.
+- [`licenses/TRADEMARK-POLICY.md`](licenses/TRADEMARK-POLICY.md): Brand usage policy.
+
+### Automation & Templates
+- `.github/ISSUE_TEMPLATE/licensing-question.md`: GitHub issue template.
 - `scripts/`: Helper scripts for syncing and exporting assets.
 
 ---
