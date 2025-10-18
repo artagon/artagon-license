@@ -54,15 +54,18 @@ fi
 
 FILES=(
   "LICENSE"
-  "LICENSE-AGPL.txt"
-  "LICENSE-COMMERCIAL.txt"
-  "LICENSING.md"
-  "CLA.md"
-  "CLA-CORPORATE.md"
   "README-LICENSE-SECTION.md"
-  "SOURCE-FILE-HEADER.txt"
-  "TRADEMARK-POLICY.md"
   "IMPLEMENTATION-GUIDE.md"
+)
+
+LICENSE_FILES=(
+  "licenses/LICENSE-AGPL.txt"
+  "licenses/LICENSE-COMMERCIAL.txt"
+  "licenses/LICENSING.md"
+  "licenses/CLA.md"
+  "licenses/CLA-CORPORATE.md"
+  "licenses/SOURCE-FILE-HEADER.txt"
+  "licenses/TRADEMARK-POLICY.md"
 )
 
 DIRECTORIES=(
@@ -84,6 +87,17 @@ copy_file() {
 }
 
 for relative in "${FILES[@]}"; do
+  src="${SUBMODULE_ROOT}/${relative}"
+  dest="${TARGET_DIR}/${relative}"
+  if [[ ! -f "${src}" ]]; then
+    echo "Warning: missing ${relative} in submodule root" >&2
+    continue
+  fi
+  copy_file "${src}" "${dest}"
+done
+
+# Copy license files to licenses/ subdirectory
+for relative in "${LICENSE_FILES[@]}"; do
   src="${SUBMODULE_ROOT}/${relative}"
   dest="${TARGET_DIR}/${relative}"
   if [[ ! -f "${src}" ]]; then
