@@ -1,0 +1,94 @@
+name: Update Artagon License Assets
+
+on:
+  workflow_call:
+    inputs:
+      submodule-path:
+        required: false
+        type: string
+        default: .legal/artagon-license
+      ref:
+        required: false
+        type: string
+        default: main
+      target-path:
+        required: false
+        type: string
+        default: .
+      pr-title:
+        required: false
+        type: string
+        default: "chore: sync Artagon licensing assets"
+      pr-branch:
+        required: false
+        type: string
+        default: chore/update-artagon-license
+      pr-body:
+        required: false
+        type: string
+        default: |
+          ## Summary
+          - Sync Artagon licensing submodule and exported assets
+          - Copied the latest files from artagon/artagon-license
+    secrets:
+      token:
+        required: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Ensure submodule tracks requested ref
+        run: |
+          set -euo pipefail
+          SUB_PATH="${{ inputs.submodule-path }}"
+          REF="${{ inputs.ref }}"
+          if [[ ! -d "${SUB_PATH}" ]]; then
+            echo "Submodule path ${SUB_PATH} not found." >&2
+            exit 1
+          fi
+          if [[ -n "${REF}" ]]; then
+            git config -f .gitmodules "submodule.${SUB_PATH}.branch" "${REF}"
+            git submodule sync -- "${SUB_PATH}"
+          fi
+          git submodule update --init --remote "${SUB_PATH}"
+
+      - name: Export licensing bundle
+        run: |
+          set -euo pipefail
+          SUB_PATH="${{ inputs.submodule-path }}"
+          TARGET="${{ inputs.target-path }}"
+          EXPORT_SCRIPT="${SUB_PATH}/scripts/export-license-assets.sh"
+          if [[ ! -x "${EXPORT_SCRIPT}" ]]; then
+            echo "Export script not executable at ${EXPORT_SCRIPT}" >&2
+            exit 1
+          fi
+          "${EXPORT_SCRIPT}" --submodule-root "${SUB_PATH}" --target "${TARGET}"
+
+      - name: Detect changes
+        id: diff
+        run: |
+          if git status --porcelain | grep -q .; then
+            echo "changed=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "changed=false" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Create pull request
+        if: steps.diff.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: ${{ inputs.pr-title }}
+          title: ${{ inputs.pr-title }}
+          body: ${{ inputs.pr-body }}
+          branch: ${{ inputs.pr-branch }}
+          token: ${{ secrets.token || github.token }}
