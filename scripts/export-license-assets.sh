@@ -58,16 +58,6 @@ FILES=(
   "IMPLEMENTATION-GUIDE.md"
 )
 
-LICENSE_FILES=(
-  "licenses/LICENSE-AGPL.txt"
-  "licenses/LICENSE-COMMERCIAL.txt"
-  "licenses/LICENSING.md"
-  "licenses/CLA.md"
-  "licenses/CLA-CORPORATE.md"
-  "licenses/SOURCE-FILE-HEADER.txt"
-  "licenses/TRADEMARK-POLICY.md"
-)
-
 DIRECTORIES=(
   ".github/ISSUE_TEMPLATE"
 )
@@ -96,16 +86,39 @@ for relative in "${FILES[@]}"; do
   copy_file "${src}" "${dest}"
 done
 
-# Copy license files to licenses/ subdirectory
-for relative in "${LICENSE_FILES[@]}"; do
-  src="${SUBMODULE_ROOT}/${relative}"
-  dest="${TARGET_DIR}/${relative}"
-  if [[ ! -f "${src}" ]]; then
-    echo "Warning: missing ${relative} in submodule root" >&2
-    continue
+# Create symlink to licenses directory instead of copying files
+licenses_src="${SUBMODULE_ROOT}/licenses"
+licenses_dest="${TARGET_DIR}/licenses"
+
+if [[ -d "${licenses_src}" ]]; then
+  # Calculate relative path from target to submodule licenses
+  # Assuming submodule is at .legal/artagon-license relative to target
+  submodule_rel_path=".legal/artagon-license/licenses"
+
+  if [[ -L "${licenses_dest}" ]]; then
+    # Symlink already exists, update it if needed
+    current_target="$(readlink "${licenses_dest}")"
+    if [[ "${current_target}" != "${submodule_rel_path}" ]]; then
+      rm "${licenses_dest}"
+      ln -s "${submodule_rel_path}" "${licenses_dest}"
+      echo "Updated licenses symlink"
+    fi
+  elif [[ -d "${licenses_dest}" ]]; then
+    # Directory exists, replace with symlink
+    echo "Replacing licenses directory with symlink..."
+    rm -rf "${licenses_dest}"
+    ln -s "${submodule_rel_path}" "${licenses_dest}"
+    echo "Created licenses symlink"
+  elif [[ ! -e "${licenses_dest}" ]]; then
+    # Nothing exists, create symlink
+    ln -s "${submodule_rel_path}" "${licenses_dest}"
+    echo "Created licenses symlink"
+  else
+    echo "Warning: licenses exists but is neither directory nor symlink" >&2
   fi
-  copy_file "${src}" "${dest}"
-done
+else
+  echo "Warning: licenses directory not found in submodule" >&2
+fi
 
 for dir in "${DIRECTORIES[@]}"; do
   src_dir="${SUBMODULE_ROOT}/${dir}"
